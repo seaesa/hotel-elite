@@ -207,10 +207,177 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ---------------- Search box (visual only, no backend) ---------------- */
-  document.querySelectorAll('.search-field[data-toggle]').forEach(function (field) {
-    field.addEventListener('click', function () {
-      // Placeholder interaction point for a future date-picker/dropdown integration.
+  /* ---------------- Search box: destination, dates, guests ---------------- */
+  var searchFields = document.querySelectorAll('.search-field[data-toggle]');
+  if (searchFields.length) {
+    function closeAllFields(except) {
+      searchFields.forEach(function (f) { if (f !== except) f.classList.remove('open'); });
+    }
+    function openField(field) {
+      if (!field) return;
+      closeAllFields(field);
+      field.classList.add('open');
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.search-field')) closeAllFields();
     });
-  });
+    searchFields.forEach(function (field) {
+      field.addEventListener('click', function () {
+        var willOpen = !field.classList.contains('open');
+        closeAllFields(field);
+        field.classList.toggle('open', willOpen);
+      });
+      var popover = field.querySelector('.field-popover');
+      if (popover) popover.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+
+    var destField = document.querySelector('.search-field[data-toggle="destination"]');
+    var checkinField = document.querySelector('.search-field[data-toggle="checkin"]');
+    var checkoutField = document.querySelector('.search-field[data-toggle="checkout"]');
+    var guestsField = document.querySelector('.search-field[data-toggle="guests"]');
+
+    /* Destination dropdown */
+    if (destField) {
+      destField.querySelectorAll('.option-list li').forEach(function (li) {
+        li.addEventListener('click', function () {
+          destField.querySelector('.value').textContent = li.dataset.value;
+          destField.querySelectorAll('.option-list li').forEach(function (o) { o.classList.remove('active'); });
+          li.classList.add('active');
+          destField.classList.remove('open');
+          openField(checkinField);
+        });
+      });
+    }
+
+    /* Date pickers */
+    if (checkinField && checkoutField) {
+      var checkinCal = checkinField.querySelector('.popover-calendar');
+      var checkoutCal = checkoutField.querySelector('.popover-calendar');
+      var dateState = { checkin: null, checkout: null };
+      var MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+      var WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+      var today0 = new Date(); today0.setHours(0, 0, 0, 0);
+
+      function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+      function formatDate(d) { return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear(); }
+      function sameDay(a, b) { return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+
+      function renderCalendar(container, opts) {
+        var viewDate = opts.viewDate;
+        function build() {
+          var y = viewDate.getFullYear(), m = viewDate.getMonth();
+          var startOffset = new Date(y, m, 1).getDay();
+          var daysInMonth = new Date(y, m + 1, 0).getDate();
+          var html = '<div class="cal-header">' +
+            '<button type="button" class="cal-nav prev" aria-label="Tháng trước"><i class="fa-solid fa-chevron-left"></i></button>' +
+            '<span class="cal-title">' + MONTHS[m] + ' ' + y + '</span>' +
+            '<button type="button" class="cal-nav next" aria-label="Tháng sau"><i class="fa-solid fa-chevron-right"></i></button>' +
+            '</div>' +
+            '<div class="cal-weekdays">' + WEEKDAYS.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
+            '<div class="cal-days">';
+          for (var i = 0; i < startOffset; i++) html += '<span class="cal-day empty"></span>';
+          for (var d = 1; d <= daysInMonth; d++) {
+            var date = new Date(y, m, d);
+            var disabled = opts.minDate && date < opts.minDate;
+            var classes = ['cal-day'];
+            if (sameDay(date, opts.selected)) classes.push('selected');
+            if (sameDay(date, today0)) classes.push('today');
+            if (disabled) classes.push('disabled');
+            html += '<button type="button" class="' + classes.join(' ') + '" data-day="' + d + '"' + (disabled ? ' disabled' : '') + '>' + d + '</button>';
+          }
+          html += '</div>';
+          container.innerHTML = html;
+          container.querySelector('.prev').addEventListener('click', function () {
+            viewDate = new Date(y, m - 1, 1);
+            build();
+          });
+          container.querySelector('.next').addEventListener('click', function () {
+            viewDate = new Date(y, m + 1, 1);
+            build();
+          });
+          container.querySelectorAll('.cal-day:not(.empty):not(.disabled)').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              opts.onSelect(new Date(y, m, parseInt(btn.dataset.day, 10)));
+            });
+          });
+        }
+        build();
+      }
+
+      function updateCheckinCalendar() {
+        renderCalendar(checkinCal, {
+          selected: dateState.checkin,
+          minDate: today0,
+          viewDate: dateState.checkin || today0,
+          onSelect: function (date) {
+            dateState.checkin = date;
+            checkinField.querySelector('.value').textContent = formatDate(date);
+            checkinField.classList.remove('open');
+            if (dateState.checkout && dateState.checkout <= date) {
+              dateState.checkout = null;
+              checkoutField.querySelector('.value').textContent = 'Chọn ngày';
+            }
+            updateCheckinCalendar();
+            updateCheckoutCalendar();
+            openField(checkoutField);
+          }
+        });
+      }
+      function updateCheckoutCalendar() {
+        var minCheckout = dateState.checkin ? new Date(dateState.checkin.getTime() + 86400000) : today0;
+        renderCalendar(checkoutCal, {
+          selected: dateState.checkout,
+          minDate: minCheckout,
+          viewDate: dateState.checkout || minCheckout,
+          onSelect: function (date) {
+            dateState.checkout = date;
+            checkoutField.querySelector('.value').textContent = formatDate(date);
+            checkoutField.classList.remove('open');
+            updateCheckoutCalendar();
+            openField(guestsField);
+          }
+        });
+      }
+      updateCheckinCalendar();
+      updateCheckoutCalendar();
+    }
+
+    /* Guests stepper */
+    if (guestsField) {
+      var guestState = { adults: 2, children: 0, rooms: 1 };
+      var guestLimits = { adults: { min: 1, max: 10 }, children: { min: 0, max: 6 }, rooms: { min: 1, max: 5 } };
+
+      function updateGuestSummary() {
+        var text = guestState.adults + ' người lớn';
+        if (guestState.children > 0) text += ', ' + guestState.children + ' trẻ em';
+        text += ', ' + guestState.rooms + ' phòng';
+        guestsField.querySelector('.value').textContent = text;
+      }
+
+      guestsField.querySelectorAll('.guest-row').forEach(function (row) {
+        var key = row.dataset.key;
+        var countEl = row.querySelector('.count');
+        var minusBtn = row.querySelector('.minus');
+        var plusBtn = row.querySelector('.plus');
+        function refresh() {
+          countEl.textContent = guestState[key];
+          minusBtn.disabled = guestState[key] <= guestLimits[key].min;
+          plusBtn.disabled = guestState[key] >= guestLimits[key].max;
+        }
+        minusBtn.addEventListener('click', function () {
+          if (guestState[key] > guestLimits[key].min) { guestState[key]--; refresh(); }
+        });
+        plusBtn.addEventListener('click', function () {
+          if (guestState[key] < guestLimits[key].max) { guestState[key]++; refresh(); }
+        });
+        refresh();
+      });
+
+      var guestsApplyBtn = guestsField.querySelector('.guests-apply');
+      guestsApplyBtn.addEventListener('click', function () {
+        updateGuestSummary();
+        guestsField.classList.remove('open');
+      });
+    }
+  }
 });

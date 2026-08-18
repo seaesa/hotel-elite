@@ -70,6 +70,14 @@
           <label>Điểm đến</label>
           <span class="value">Chọn điểm đến</span>
         </div>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+        <div class="field-popover popover-destination">
+          <ul class="option-list">
+            <li data-value="Hà Nội">Hà Nội</li>
+            <li data-value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</li>
+            <li data-value="Đà Nẵng">Đà Nẵng</li>
+          </ul>
+        </div>
       </div>
       <div class="search-field" data-toggle="checkin">
         <i class="fa-regular fa-calendar field-icon"></i>
@@ -77,6 +85,8 @@
           <label>Ngày nhận phòng</label>
           <span class="value">Chọn ngày</span>
         </div>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+        <div class="field-popover popover-calendar" data-calendar="checkin"></div>
       </div>
       <div class="search-field" data-toggle="checkout">
         <i class="fa-regular fa-calendar field-icon"></i>
@@ -84,6 +94,8 @@
           <label>Ngày trả phòng</label>
           <span class="value">Chọn ngày</span>
         </div>
+        <i class="fa-solid fa-chevron-down chevron"></i>
+        <div class="field-popover popover-calendar" data-calendar="checkout"></div>
       </div>
       <div class="search-field" data-toggle="guests">
         <i class="fa-solid fa-user-group field-icon"></i>
@@ -92,6 +104,33 @@
           <span class="value">Chọn số khách</span>
         </div>
         <i class="fa-solid fa-chevron-down chevron"></i>
+        <div class="field-popover popover-guests">
+          <div class="guest-row" data-key="adults">
+            <div class="guest-label"><strong>Người lớn</strong><span>Từ 13 tuổi</span></div>
+            <div class="stepper">
+              <button type="button" class="minus" aria-label="Giảm">−</button>
+              <span class="count">2</span>
+              <button type="button" class="plus" aria-label="Tăng">+</button>
+            </div>
+          </div>
+          <div class="guest-row" data-key="children">
+            <div class="guest-label"><strong>Trẻ em</strong><span>0–12 tuổi</span></div>
+            <div class="stepper">
+              <button type="button" class="minus" aria-label="Giảm">−</button>
+              <span class="count">0</span>
+              <button type="button" class="plus" aria-label="Tăng">+</button>
+            </div>
+          </div>
+          <div class="guest-row" data-key="rooms">
+            <div class="guest-label"><strong>Phòng</strong></div>
+            <div class="stepper">
+              <button type="button" class="minus" aria-label="Giảm">−</button>
+              <span class="count">1</span>
+              <button type="button" class="plus" aria-label="Tăng">+</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary guests-apply">Áp dụng</button>
+        </div>
       </div>
       <button class="btn btn-primary btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
     </div>
