@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
   'use strict';
 
+  /* ---------------- Transparent header on scroll ---------------- */
+  var siteHeader = document.querySelector('.site-header');
+  if (siteHeader) {
+    var syncHeaderScroll = function () {
+      siteHeader.classList.toggle('is-scrolled', window.scrollY > 20);
+    };
+    syncHeaderScroll();
+    window.addEventListener('scroll', syncHeaderScroll, { passive: true });
+  }
+
   /* ---------------- Mobile nav ---------------- */
   var hamburger = document.querySelector('.hamburger');
   var mainNav = document.querySelector('.main-nav');

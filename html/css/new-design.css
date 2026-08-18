@@ -103,11 +103,37 @@ body.nd {
 
 /* ---------------- Header ---------------- */
 .nd .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+.nd .site-header.is-scrolled {
   background: var(--white);
-  border-bottom: 1px solid var(--gray-300);
+  border-bottom-color: var(--gray-300);
+  box-shadow: 0 4px 16px rgba(16, 40, 32, .06);
+}
+.nd .site-header:not(.is-scrolled) .main-nav > ul > li > a,
+.nd .site-header:not(.is-scrolled) .header-phone,
+.nd .site-header:not(.is-scrolled) .icon-btn,
+.nd .site-header:not(.is-scrolled) .hamburger {
+  color: var(--white);
+}
+.nd .site-header:not(.is-scrolled) .header-phone i { color: var(--white); }
+.nd .site-header:not(.is-scrolled) .icon-btn,
+.nd .site-header:not(.is-scrolled) .hamburger {
+  border-color: rgba(255, 255, 255, .5);
+}
+.nd .site-header:not(.is-scrolled) .main-nav > ul > li.active > a,
+.nd .site-header:not(.is-scrolled) .main-nav > ul > li > a:hover {
+  color: var(--green-50);
+}
+.nd .site-header:not(.is-scrolled) .logo img {
+  filter: brightness(0) invert(1);
 }
 .nd .header-inner {
   max-width: var(--maxw);
@@ -188,6 +214,7 @@ body.nd {
   height: 560px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
   max-width: var(--maxw);
   margin: 0 auto;
@@ -352,6 +379,7 @@ body.nd {
   padding: 40px 36px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
 }
 .nd .cta-box .eyebrow { font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--green-800); margin: 0 0 14px; }
@@ -372,9 +400,17 @@ body.nd {
 /* ---------------- Partners ---------------- */
 .nd .partners-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; margin-bottom: 30px; }
 .nd .partners-grid .tagline { font-size: 13.5px; color: var(--gray-700); font-weight: 600; }
-.nd .partner-logos { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 46px; }
-.nd .partner-logos img { height: 40px; width: auto; object-fit: contain; filter: grayscale(1); opacity: .75; transition: filter .2s ease, opacity .2s ease; }
+.nd .partner-logos { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 40px; }
+.nd .partner-logos img { height: 48px; width: auto; object-fit: contain; filter: grayscale(1); opacity: .75; transition: filter .2s ease, opacity .2s ease; }
 .nd .partner-logos img:hover { filter: grayscale(0); opacity: 1; }
+.nd .partner-logos img.partner-badge {
+  height: 32px;
+  background: var(--green-900);
+  padding: 8px 16px;
+  border-radius: 8px;
+  filter: none;
+  opacity: 1;
+}
 
 /* ---------------- Newsletter ---------------- */
 .nd .newsletter-box {
